@@ -319,9 +319,7 @@ writeDocx opts doc@(Pandoc meta _) = do
                        "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")) headers ++
                   map (\x -> (maybe "" ("/word/" ++) $ extractTarget x,
                        "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")) footers) ++
-                    map mkImageOverride imgs ++
-                    map mkMediaOverride [ eRelativePath e | e <- zEntries refArchive
-                                        , "word/media/" `isPrefixOf` eRelativePath e ]
+                    map mkImageOverride imgs
 
   let defaultnodes = [mknode "Default"
               [("Extension","xml"),("ContentType","application/xml")] (),
