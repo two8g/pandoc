@@ -314,6 +314,9 @@ writeDocx opts doc@(Pandoc meta _) = do
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml")
                   ,("/word/footnotes.xml",
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml")
+                  ,("/word/endnotes.xml","application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml")
+                  ,("/word/media/footer.xml","image/png")
+                  ,("/word/media/hearder.xml","image/png")
                   ] ++
                   map (\x -> (maybe "" ("/word/" ++) $ extractTarget x,
                        "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")) headers ++
@@ -322,6 +325,8 @@ writeDocx opts doc@(Pandoc meta _) = do
                     map mkImageOverride imgs
 
   let defaultnodes = [mknode "Default"
+              [("Extension","png"),("ContentType","image/png")] (),
+             mknode "Default"
               [("Extension","xml"),("ContentType","application/xml")] (),
              mknode "Default"
               [("Extension","rels"),("ContentType","application/vnd.openxmlformats-package.relationships+xml")] ()]
