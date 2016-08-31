@@ -29,11 +29,11 @@
     <w:rsid w:val="00E315A3" />
   </w:rsids>
   <m:mathPr>
-    <m:mathFont m:val="Lucida Grande" />
+    <m:mathFont m:val="Times New Roman" />
     <m:brkBin m:val="before" />
     <m:brkBinSub m:val="--" />
-    <m:smallFrac m:val="false" />
-    <m:dispDef m:val="false" />
+    <m:smallFrac m:val="0" />
+    <m:dispDef m:val="0" />
     <m:lMargin m:val="0" />
     <m:rMargin m:val="0" />
     <m:wrapRight />
