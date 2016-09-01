@@ -831,8 +831,18 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
   rows' <- mapM (mapM cellToOpenXML . zip aligns) rows
   let borderProps = mknode "w:tcPr" []
                     [ mknode "w:tcBorders" []
-                      $ mknode "w:bottom" [("w:val","single")] ()
-                    , mknode "w:vAlign" [("w:val","bottom")] () ]
+                      $ mknode "w:bottom" [("w:val","single"),("w:sz","4"),
+                                           ("w:space","0"),("w:color","auto")] ()
+                      ,mknode "w:top" [("w:val","single"),("w:sz","4"),
+                                          ("w:space","0"),("w:color","auto")] ()
+                      ,mknode "w:left" [("w:val","single"),("w:sz","4"),
+                                          ("w:space","0"),("w:color","auto")] ()
+                      ,mknode "w:right" [("w:val","single"),("w:sz","4"),
+                                          ("w:space","0"),("w:color","auto")] ()
+                      ,mknode "w:insideH" [("w:val","single"),("w:sz","4"),
+                                          ("w:space","0"),("w:color","auto")] ()
+                      ,mknode "w:insideV" [("w:val","single"),("w:sz","4"),
+                                          ("w:space","0"),("w:color","auto")] ()]
   let emptyCell = [mknode "w:p" [] [pCustomStyle "Compact"]]
   let mkcell border contents = mknode "w:tc" []
                             $ [ borderProps | border ] ++
@@ -841,7 +851,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
                                else contents
   let mkrow border cells = mknode "w:tr" [] $
                         [mknode "w:trPr" [] [
-                          mknode "w:cnfStyle" [("w:firstRow","1")] ()] | border]
+                          mknode "w:jc" [("w:val","center")] ()] | border]
                         ++ map (mkcell border) cells
   let textwidth = 7920  -- 5.5 in in twips, 1/20 pt
   let fullrow = 5000 -- 100% specified in pct
@@ -854,7 +864,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
     [mknode "w:tbl" []
       ( mknode "w:tblPr" []
         (   mknode "w:tblStyle" [("w:val","TableNormal")] () :
-            mknode "w:tblW" [("w:type", "pct"), ("w:w", show rowwidth)] () :
+            mknode "w:tblW" [("w:type", "dxa"), ("w:w", "7920")] () :
             mknode "w:tblLook" [("w:firstRow","1") | hasHeader ] () :
           [ mknode "w:tblCaption" [("w:val", captionStr)] ()
           | not (null caption) ] )
@@ -863,7 +873,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
             then []
             else map mkgridcol widths)
       : [ mkrow True headers' | hasHeader ] ++
-      map (mkrow False) rows'
+      map (mkrow True) rows'
       )]
 blockToOpenXML opts (BulletList lst) = do
   let marker = BulletMarker
