@@ -831,7 +831,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
   rows' <- mapM (mapM cellToOpenXML . zip aligns) rows
   let borderProps = mknode "w:tcPr" []
                     [ mknode "w:tcBorders" []
-                      $ mknode "w:bottom" [("w:val","single"),("w:sz","4"),
+                      $[ mknode "w:bottom" [("w:val","single"),("w:sz","4"),
                                            ("w:space","0"),("w:color","auto")] ()
                       ,mknode "w:top" [("w:val","single"),("w:sz","4"),
                                           ("w:space","0"),("w:color","auto")] ()
@@ -843,6 +843,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
                                           ("w:space","0"),("w:color","auto")] ()
                       ,mknode "w:insideV" [("w:val","single"),("w:sz","4"),
                                           ("w:space","0"),("w:color","auto")] ()]
+                    ]
   let emptyCell = [mknode "w:p" [] [pCustomStyle "Compact"]]
   let mkcell border contents = mknode "w:tc" []
                             $ [ borderProps | border ] ++
