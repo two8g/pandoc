@@ -259,16 +259,35 @@ writeDocx opts doc@(Pandoc meta _) = do
   let toImageEntry (_,path,_,_,img) = toEntry ("word/" ++ path) epochtime $ toLazy img
   let imageEntries = map toImageEntry imgs
 
+--  let stdAttributes =
+--            [("xmlns:w","http://schemas.openxmlformats.org/wordprocessingml/2006/main")
+--            ,("xmlns:m","http://schemas.openxmlformats.org/officeDocument/2006/math")
+--            ,("xmlns:r","http://schemas.openxmlformats.org/officeDocument/2006/relationships")
+--            ,("xmlns:o","urn:schemas-microsoft-com:office:office")
+--            ,("xmlns:v","urn:schemas-microsoft-com:vml")
+--            ,("xmlns:w10","urn:schemas-microsoft-com:office:word")
+--            ,("xmlns:a","http://schemas.openxmlformats.org/drawingml/2006/main")
+--            ,("xmlns:pic","http://schemas.openxmlformats.org/drawingml/2006/picture")
+--            ,("xmlns:wp","http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing")]
   let stdAttributes =
-            [("xmlns:w","http://schemas.openxmlformats.org/wordprocessingml/2006/main")
-            ,("xmlns:m","http://schemas.openxmlformats.org/officeDocument/2006/math")
-            ,("xmlns:r","http://schemas.openxmlformats.org/officeDocument/2006/relationships")
-            ,("xmlns:o","urn:schemas-microsoft-com:office:office")
-            ,("xmlns:v","urn:schemas-microsoft-com:vml")
-            ,("xmlns:w10","urn:schemas-microsoft-com:office:word")
-            ,("xmlns:a","http://schemas.openxmlformats.org/drawingml/2006/main")
-            ,("xmlns:pic","http://schemas.openxmlformats.org/drawingml/2006/picture")
-            ,("xmlns:wp","http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing")]
+              [("xmlns:wpc","http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas")
+              ,("xmlns:mc","http://schemas.openxmlformats.org/markup-compatibility/2006")
+              ,("xmlns:o","urn:schemas-microsoft-com:office:office")
+              ,("xmlns:r","http://schemas.openxmlformats.org/officeDocument/2006/relationships")
+              ,("xmlns:m","http://schemas.openxmlformats.org/officeDocument/2006/math")
+              ,("xmlns:v","urn:schemas-microsoft-com:vml")
+              ,("xmlns:wp14","http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing")
+              ,("xmlns:wp","http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing")
+              ,("xmlns:w10","urn:schemas-microsoft-com:office:word")
+              ,("xmlns:w","http://schemas.openxmlformats.org/wordprocessingml/2006/main")
+              ,("xmlns:w14","http://schemas.microsoft.com/office/word/2010/wordml")
+              ,("xmlns:wpg","http://schemas.microsoft.com/office/word/2010/wordprocessingGroup")
+              ,("xmlns:wpi","http://schemas.microsoft.com/office/word/2010/wordprocessingInk")
+              ,("xmlns:wne","http://schemas.microsoft.com/office/word/2006/wordml")
+              ,("xmlns:wps","http://schemas.microsoft.com/office/word/2010/wordprocessingShape")
+              ,("mc:Ignorable","w14 wp14")
+              ,("xmlns:a","http://schemas.openxmlformats.org/drawingml/2006/main")
+              ,("xmlns:pic","http://schemas.openxmlformats.org/drawingml/2006/picture")]
 
 
   parsedRels <- parseXml refArchive distArchive "word/_rels/document.xml.rels"
@@ -977,7 +996,8 @@ formattedString str = do
                [("xml:space","preserve")] (stripInvalidChars str) ] ]
 
 setFirstPara :: WS ()
-setFirstPara =  modify $ \s -> s { stFirstPara = True }
+-- 取消 FirstPara
+setFirstPara =  modify $ \s -> s { stFirstPara = False }
 
 -- | Convert an inline element to OpenXML.
 inlineToOpenXML :: WriterOptions -> Inline -> WS [Element]
