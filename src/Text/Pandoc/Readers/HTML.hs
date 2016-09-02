@@ -424,6 +424,7 @@ pTable = try $ do
   caption <- option mempty $ pInTags "caption" inline <* skipMany pBlank
   -- TODO actually read these and take width information from them
   widths' <- (mconcat <$> many1 pColgroup) <|> many pCol
+  height' <- (mconcat <$> many1 pColgroup) <|> many pCol
   let pTh = option [] $ pInTags "tr" (pCell "th")
       pTr = try $ skipMany pBlank >> pInTags "tr" (pCell "td" <|> pCell "th")
       pTBody = do pOptInTag "tbody" $ many1 pTr
@@ -443,16 +444,24 @@ pTable = try $ do
                              [Plain _] -> True
                              _         -> False
   let isSimple = all isSinglePlain $ concat (head':rows)
-  let cols = length $ if null head' then head rows else head'
+  -- two8g modify this to support colspans or rowspans
+--  let cols = length $ if null head' then head rows else head'
   -- fail if there are colspans or rowspans
-  guard $ all (\r -> length r == cols) rows
-  let aligns = replicate cols AlignDefault
+--  guard $ all (\r -> length r == cols) rows
+  let cols = map (\x -> length x) $ if null head' then rows else head' : rows
+--  let aligns = replicate cols AlignDefault
+  let aligns = map (\x -> replicate x AlignDefault ) cols
   let widths = if null widths'
                   then if isSimple
-                       then replicate cols 0
-                       else replicate cols (1.0 / fromIntegral cols)
+                       then map (\x -> replicate x 0) cols
+                       else map (\x -> replicate x (1.0 / fromIntegral x)) cols
                   else widths'
-  return $ B.table caption (zip aligns widths) head' rows
+  let height = if null height'
+                  then if isSimple
+                       then map (\x -> replicate x 0) cols
+                       else map (\x -> replicate x (1.0 / fromIntegral x)) cols
+                  else height'
+  return $ B.complexTable caption aligns widths height head' rows
 
 pCol :: TagParser Double
 pCol = try $ do

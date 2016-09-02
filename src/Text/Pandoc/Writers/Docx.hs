@@ -817,7 +817,7 @@ blockToOpenXML _ HorizontalRule = do
     $ mknode "v:rect" [("style","width:0;height:1.5pt"),
                        ("o:hralign","center"),
                        ("o:hrstd","t"),("o:hr","t")] () ]
-blockToOpenXML opts (Table caption aligns widths headers rows) = do
+blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = do
   setFirstPara
   let captionStr = stringify caption
   caption' <- if null caption
@@ -827,7 +827,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
   let alignmentFor al = mknode "w:jc" [("w:val",alignmentToString al)] ()
   let cellToOpenXML (al, cell) = withParaProp (alignmentFor al)
                                     $ blocksToOpenXML opts cell
-  headers' <- mapM cellToOpenXML $ zip aligns headers
+  headers' <- mapM cellToOpenXML $ zip (head aligns) headers
   rows' <- mapM (mapM cellToOpenXML . zip aligns) rows
   let borderProps = mknode "w:tcPr" []
                     [ mknode "w:tcBorders" []
@@ -856,7 +856,7 @@ blockToOpenXML opts (Table caption aligns widths headers rows) = do
                         ++ map (mkcell border) cells
   let textwidth = 7920  -- 5.5 in in twips, 1/20 pt
   let fullrow = 5000 -- 100% specified in pct
-  let rowwidth = fullrow * sum widths
+  let rowwidth = fullrow * sum (head widths)
   let mkgridcol w = mknode "w:gridCol"
                        [("w:w", show (floor (textwidth * w) :: Integer))] ()
   let hasHeader = not (all null headers)
