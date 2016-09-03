@@ -448,19 +448,15 @@ pTable = try $ do
 --  let cols = length $ if null head' then head rows else head'
   -- fail if there are colspans or rowspans
 --  guard $ all (\r -> length r == cols) rows
-  let cols = map (\x -> length x) $ if null head' then rows else head' : rows
+  let cols = map (\x -> length x) $ if null head' then rows else (head':rows)
 --  let aligns = replicate cols AlignDefault
   let aligns = map (\x -> replicate x AlignDefault ) cols
-  let widths = if null widths'
-                  then if isSimple
-                       then map (\x -> replicate x 0) cols
-                       else map (\x -> replicate x (1.0 / fromIntegral x)) cols
-                  else widths'
-  let height = if null height'
-                  then if isSimple
-                       then map (\x -> replicate x 0) cols
-                       else map (\x -> replicate x (1.0 / fromIntegral x)) cols
-                  else height'
+  let widths = if isSimple
+                  then map (\x -> replicate x 0) cols
+                  else map (\x -> replicate x (1.0 / fromIntegral x)) cols
+  let height = if isSimple
+                   then map (\x -> replicate x 0) cols
+                   else map (\x -> replicate x (1.0 / fromIntegral x)) cols
   return $ B.complexTable caption aligns widths height head' rows
 
 pCol :: TagParser Double

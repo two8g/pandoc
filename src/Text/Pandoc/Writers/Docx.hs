@@ -828,7 +828,7 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
   let cellToOpenXML (al, cell) = withParaProp (alignmentFor al)
                                     $ blocksToOpenXML opts cell
   headers' <- mapM cellToOpenXML $ zip (head aligns) headers
-  rows' <- mapM (mapM cellToOpenXML . zip aligns) rows
+  rows' <- mapM (mapM cellToOpenXML . zip (head aligns)) rows
   let borderProps = mknode "w:tcPr" []
                     [ mknode "w:tcBorders" []
                       $[ mknode "w:bottom" [("w:val","single"),("w:sz","4"),
@@ -844,9 +844,20 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
                       ,mknode "w:insideV" [("w:val","single"),("w:sz","4"),
                                           ("w:space","0"),("w:color","auto")] ()]
                     ]
+  let textwidth = 7920  -- 5.5 in in twips, 1/20 pt
+  let fullrow = 5000 -- 100% specified in pct
+  let rowwidth = fullrow * sum (head widths)
   let emptyCell = [mknode "w:p" [] [pCustomStyle "Compact"]]
   let mkcell border contents = mknode "w:tc" []
                             $ [ borderProps | border ] ++
+                            if null contents
+                               then emptyCell
+                               else contents
+  let mkcellW border (contents,w)= mknode "w:tc" []
+                            $ [ borderProps | border ] ++
+                            [mknode "w:tcPr" [] [
+                              mknode "w:tcW" [("w:type", "dxa"),("w:w",show (floor (textwidth * w) :: Integer))] ()]
+                            ] ++
                             if null contents
                                then emptyCell
                                else contents
@@ -854,27 +865,24 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
                         [mknode "w:trPr" [] [
                           mknode "w:jc" [("w:val","center")] ()] | border]
                         ++ map (mkcell border) cells
-  let textwidth = 7920  -- 5.5 in in twips, 1/20 pt
-  let fullrow = 5000 -- 100% specified in pct
-  let rowwidth = fullrow * sum (head widths)
+  let mkrowW border cws= mknode "w:tr" [] $
+                        [mknode "w:trPr" [] [
+                          mknode "w:jc" [("w:val","center")] ()] | border]
+                        ++ map (mkcellW border) cws
   let mkgridcol w = mknode "w:gridCol"
                        [("w:w", show (floor (textwidth * w) :: Integer))] ()
+  let rws = (zipWith zip rows' widths)
   let hasHeader = not (all null headers)
   return $
     caption' ++
     [mknode "w:tbl" []
       ( mknode "w:tblPr" []
-        (   mknode "w:tblStyle" [("w:val","TableNormal")] () :
-            mknode "w:tblW" [("w:type", "dxa"), ("w:w", "7920")] () :
+        (   mknode "w:tblW" [("w:type", "dxa"), ("w:w", show(textwidth))] () :
             mknode "w:tblLook" [("w:firstRow","1") | hasHeader ] () :
           [ mknode "w:tblCaption" [("w:val", captionStr)] ()
           | not (null caption) ] )
-      : mknode "w:tblGrid" []
-        (if all (==0) widths
-            then []
-            else map mkgridcol widths)
       : [ mkrow True headers' | hasHeader ] ++
-      map (mkrow True) rows'
+      map (mkrowW True) rws
       )]
 blockToOpenXML opts (BulletList lst) = do
   let marker = BulletMarker
