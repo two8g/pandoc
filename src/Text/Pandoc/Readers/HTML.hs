@@ -436,28 +436,31 @@ pTable = try $ do
   rowsLs <- many pTBody
   rows'  <- pOptInTag "tfoot" $ many pTr
   TagClose _ <- pSatisfy (~== TagClose "table")
-  let rows = (concat rowsLs) ++ rows'
+  let rows2 = (concat rowsLs) ++ rows'
   -- fail on empty table
+  let head''' = (map fst) head'
+  let rows = map (map fst) rows2
   guard $ not $ null head' && null rows
   let isSinglePlain x = case B.toList x of
                              []        -> True
                              [Plain _] -> True
                              _         -> False
-  let isSimple = all isSinglePlain $ concat (head':rows)
+  let isSimple = all isSinglePlain $ concat (head''':rows)
   -- two8g modify this to support colspans or rowspans
 --  let cols = length $ if null head' then head rows else head'
   -- fail if there are colspans or rowspans
 --  guard $ all (\r -> length r == cols) rows
-  let cols = map (\x -> length x) $ if null head' then rows else (head':rows)
+  let colspanss = map( map snd ) rows2
 --  let aligns = replicate cols AlignDefault
+  let cols = map sum colspanss
   let aligns = map (\x -> replicate x AlignDefault ) cols
   let widths = if isSimple
-                  then map (\x -> replicate x 0) cols
-                  else map (\x -> replicate x (1.0 / fromIntegral x)) cols
+                  then map (\x -> replicate (fromIntegral x) 0) cols
+                  else map ( map (\x -> (fromIntegral x)/(fromIntegral (head cols))) ) colspanss
   let height = if isSimple
                    then map (\x -> replicate x 0) cols
                    else map (\x -> replicate x (1.0 / fromIntegral x)) cols
-  return $ B.complexTable caption aligns widths height head' rows
+  return $ B.complexTable caption aligns widths height head''' rows
 
 pCol :: TagParser Double
 pCol = try $ do
@@ -476,12 +479,22 @@ pColgroup = try $ do
   skipMany pBlank
   manyTill pCol (pCloses "colgroup" <|> eof) <* skipMany pBlank
 
-pCell :: String -> TagParser [Blocks]
+pCell :: String -> TagParser [(Blocks,Int)]
 pCell celltype = try $ do
   skipMany pBlank
-  res <- pInTags celltype block
+  attribs <- pSatisfy (~== TagOpen celltype [])
+--  let colspanchar = fromMaybe "1" $ lookup "colspan" attribs
+  let colspan' = fromAttrib "colspan" attribs
+      colspan = if null colspan'
+                  then 1
+                  else read colspan'
+  let rowspan' = fromAttrib "rowspan" attribs
+      rowspan = if null rowspan'
+                  then 1
+                  else read rowspan'
+  res <- mconcat <$> manyTill block (pCloses celltype <|> eof)
   skipMany pBlank
-  return [res]
+  return [(res,colspan)]
 
 pBlockQuote :: TagParser Blocks
 pBlockQuote = do
