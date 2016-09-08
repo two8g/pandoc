@@ -991,9 +991,10 @@ getParaProps displayMathPara = do
                          , mknode "w:ilvl" [("w:val",show listLevel)] () ]
                        ]
                   else []
+  bodyTextStyle <- pStyleM "Body Text"
   return $ case props ++ listPr of
                 [] -> []
-                ps -> [mknode "w:pPr" [] ps]
+                ps -> [mknode "w:pPr" [] (bodyTextStyle:ps) ]
 
 pushParaProp :: Element -> WS ()
 pushParaProp d = modify $ \s -> s{ stParaProperties = d : stParaProperties s }
