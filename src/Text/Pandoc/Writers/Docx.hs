@@ -625,8 +625,8 @@ mkLvl marker lvl =
                  NumberMarker st de n -> (styleFor st lvl
                                          ,patternFor de ("%" ++ show (lvl + 1))
                                          ,show n)
-          step = 720
-          hang = 480
+          step = 240
+          hang = 360
           bulletFor 0 = "\x2022"  -- filled circle
           bulletFor 1 = "\x2013"  -- en dash
           bulletFor 2 = "\x2022"  -- hyphen bullet
@@ -845,7 +845,7 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
                       ,mknode "w:insideV" [("w:val","single"),("w:sz","4"),
                                           ("w:space","0"),("w:color","auto")] ()]
                     ]
-  let textwidth = 7920  -- 5.5 in in twips, 1/20 pt
+  let textwidth = 7200  -- 5.5 in in twips, 1/20 pt
   let fullrow = 5000 -- 100% specified in pct
   let rowwidth = fullrow * sum (head widths)
   let emptyCell = [mknode "w:p" [] [pCustomStyle "Compact"]]
