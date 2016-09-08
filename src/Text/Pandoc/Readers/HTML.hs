@@ -438,29 +438,32 @@ pTable = try $ do
   TagClose _ <- pSatisfy (~== TagClose "table")
   let rows2 = (concat rowsLs) ++ rows'
   -- fail on empty table
-  let head''' = (map fst) head'
+  let heads = (map fst) head'
   let rows = map (map fst) rows2
+      attribs =  map (map snd) rows2
+      colspanss = map( map tdColspan ) attribs
+      rowspanss = map( map tdRowspan ) attribs
+      alignss = map( map tdTextAlign ) attribs
+      colrow = zipWith zip colspanss rowspanss
   guard $ not $ null head' && null rows
   let isSinglePlain x = case B.toList x of
                              []        -> True
                              [Plain _] -> True
                              _         -> False
-  let isSimple = all isSinglePlain $ concat (head''':rows)
+  let isSimple = all isSinglePlain $ concat (heads:rows)
   -- two8g modify this to support colspans or rowspans
 --  let cols = length $ if null head' then head rows else head'
   -- fail if there are colspans or rowspans
 --  guard $ all (\r -> length r == cols) rows
-  let colspanss = map( map snd ) rows2
---  let aligns = replicate cols AlignDefault
   let cols = map sum colspanss
-  let aligns = map (\x -> replicate x AlignDefault ) cols
   let widths = if isSimple
                   then map (\x -> replicate (fromIntegral x) 0) cols
                   else map ( map (\x -> (fromIntegral x)/(fromIntegral (head cols))) ) colspanss
   let height = if isSimple
                    then map (\x -> replicate x 0) cols
                    else map (\x -> replicate x (1.0 / fromIntegral x)) cols
-  return $ B.complexTable caption aligns widths height head''' rows
+  return $ B.complexTable caption alignss widths height heads rows
+
 
 pCol :: TagParser Double
 pCol = try $ do
@@ -479,22 +482,52 @@ pColgroup = try $ do
   skipMany pBlank
   manyTill pCol (pCloses "colgroup" <|> eof) <* skipMany pBlank
 
-pCell :: String -> TagParser [(Blocks,Int)]
+pCell :: String -> TagParser [(Blocks,[Attribute String])]
 pCell celltype = try $ do
   skipMany pBlank
-  attribs <- pSatisfy (~== TagOpen celltype [])
---  let colspanchar = fromMaybe "1" $ lookup "colspan" attribs
-  let colspan' = fromAttrib "colspan" attribs
-      colspan = if null colspan'
-                  then 1
-                  else read colspan'
-  let rowspan' = fromAttrib "rowspan" attribs
-      rowspan = if null rowspan'
-                  then 1
-                  else read rowspan'
+  TagOpen _ attribs <- pSatisfy (~== TagOpen celltype [])
   res <- mconcat <$> manyTill block (pCloses celltype <|> eof)
   skipMany pBlank
-  return [(res,colspan)]
+  return [(res,attribs)]
+
+tdColspan :: [Attribute String] -> Int
+tdColspan attribs =
+  read (fromMaybe "1" $ lookup "colspan" attribs)
+
+tdRowspan :: [Attribute String] -> Int
+tdRowspan attribs =
+  read (fromMaybe "1" $ lookup "rowspan" attribs)
+
+tdTextAlign :: [Attribute String] -> Alignment
+tdTextAlign attribs =
+  if align == "left"
+    then AlignLeft
+    else if align == "right"
+    then AlignRight
+    else if align == "center"
+    then AlignCenter
+    else AlignLeft
+  where styleAttr   = fromMaybe "" $ lookup "style" attribs
+        align = fromMaybe "" $ pickStyleAttrProps ["text-align"] styleAttr
+
+---------------------
+----很危险很丑陋的代码
+----插入元素到指定位置
+--insertAt :: Int -> a -> [a] -> [a]
+--insertAt 1 x ys = x:ys
+--insertAt n x (y:ys) = y:insertAt n-1 x ys
+--
+--insertAtAt :: Int -> Int -> a -> [[a]] -> [[a]]
+--insertAtAt 1 n2 x (y:ys) = (inserAt n2 y):ys
+--insertAtAt n1 n2 x (y:ys) = y:(insert n1-1 n2 ys)
+--
+--newNullCell :: Int->Alignment->([Blocks],Int,Alignment)
+--newNullCell = ([],colspan,align)
+--
+--rowsFuck :: [[Int]]->[[([Blocks],Int,Alignment)]]->[[([Blocks],Int,Alignment)]]
+--rowsFuck rowsoanss rows newrows=
+--  map () rowsoanss
+----------------------
 
 pBlockQuote :: TagParser Blocks
 pBlockQuote = do

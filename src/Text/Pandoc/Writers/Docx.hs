@@ -828,7 +828,8 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
   let cellToOpenXML (al, cell) = withParaProp (alignmentFor al)
                                     $ blocksToOpenXML opts cell
   headers' <- mapM cellToOpenXML $ zip (head aligns) headers
-  rows' <- mapM (mapM cellToOpenXML . zip (head aligns)) rows
+  rows' <- mapM (mapM cellToOpenXML) (zipWith zip aligns rows)
+--  let rows' = map (map cellToOpenXML) (zipWith zip aligns rows)
   let borderProps = mknode "w:tcPr" []
                     [ mknode "w:tcBorders" []
                       $[ mknode "w:bottom" [("w:val","single"),("w:sz","4"),
@@ -853,6 +854,11 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
                             if null contents
                                then emptyCell
                                else contents
+--  :if restart
+--    then mknode "w:vMerge" [("w:val", "restart")] ()
+--    else if contine
+--      then mknode "w:vMerge" [] ()
+--      else ()
   let mkcellW border (contents,w)= mknode "w:tc" []
                             $ [ borderProps | border ] ++
                             [mknode "w:tcPr" [] [
