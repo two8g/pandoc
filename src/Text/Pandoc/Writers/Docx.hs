@@ -1208,10 +1208,16 @@ inlineToOpenXML opts (Image attr alt (src, _)) = do
                               , spPr ] ]
           let imgElt = mknode "w:r" [] $
                mknode "w:drawing" [] $
-                 mknode "wp:inline" []
+                 mknode "wp:anchor" [("distT","0"),("distL","114300"),("distR","114300"),("simplePos","0"),("relativeHeight","251658240"),("behindDoc","0"),("locked","0"),("layoutInCell","1"),("allowOverlap","1")]
                   [ mknode "wp:extent" [("cx",show xemu),("cy",show yemu)] ()
                   , mknode "wp:effectExtent" [("b","0"),("l","0"),("r","0"),("t","0")] ()
                   , mknode "wp:docPr" [("descr",stringify alt),("id","1"),("name","Picture")] ()
+                  , mknode "wp:wrapTopAndBottom" [] ()
+                  , mknode "wp:positionH" [("relativeFrom","column")]
+                      $ mknode "wp:posOffset" [] $ show (2637155 - fromIntegral xemu/2)
+                  , mknode "wp:positionV" [("relativeFrom","paragraph")]
+                      $ mknode "wp:posOffset" [] $ show 72390
+                  , mknode "wp:cNvGraphicFramePr" [] $ mknode "a:graphicFrameLocks" [("noChangeAspect","1")] ()
                   , graphic ]
           let imgext = case mt >>= extensionFromMimeType of
                             Just x    -> '.':x

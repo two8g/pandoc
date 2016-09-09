@@ -506,7 +506,7 @@ tdTextAlign attribs =
     then AlignRight
     else if align == "center"
     then AlignCenter
-    else AlignCenter
+    else AlignLeft
   where styleAttr   = fromMaybe "" $ lookup "style" attribs
         align = fromMaybe "" $ pickStyleAttrProps ["text-align"] styleAttr
 
