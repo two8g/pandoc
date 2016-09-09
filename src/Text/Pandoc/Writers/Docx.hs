@@ -110,6 +110,7 @@ data WriterState = WriterState{
        , stStyleMaps      :: StyleMaps
        , stFirstPara      :: Bool
        , stTocTitle       :: [Inline]
+       , stInTable        :: Bool
        }
 
 defaultWriterState :: WriterState
@@ -132,6 +133,7 @@ defaultWriterState = WriterState{
       , stStyleMaps      = defaultStyleMaps
       , stFirstPara      = False
       , stTocTitle       = normalizeInlines [Str "Table of Contents"]
+      , stInTable        = False
       }
 
 type WS a = StateT WriterState IO a
@@ -819,6 +821,7 @@ blockToOpenXML _ HorizontalRule = do
                        ("o:hrstd","t"),("o:hr","t")] () ]
 blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = do
   setFirstPara
+  modify $ \st -> st{ stInTable = True}
   let captionStr = stringify caption
   caption' <- if null caption
                  then return []
@@ -879,17 +882,19 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
                        [("w:w", show (floor (textwidth * w) :: Integer))] ()
   let rws = (zipWith zip rows' widths)
   let hasHeader = not (all null headers)
-  return $
-    caption' ++
-    [mknode "w:tbl" []
-      ( mknode "w:tblPr" []
-        (   mknode "w:tblW" [("w:type", "dxa"), ("w:w", show(textwidth))] () :
-            mknode "w:tblLook" [("w:firstRow","1") | hasHeader ] () :
-          [ mknode "w:tblCaption" [("w:val", captionStr)] ()
-          | not (null caption) ] )
-      : [ mkrow True headers' | hasHeader ] ++
-      map (mkrowW True) rws
-      )]
+  let content = caption' ++
+                [mknode "w:tbl" []
+                  ( mknode "w:tblPr" []
+                    (   mknode "w:tblStyle" [("w:val","TableNormal")] () :
+                        mknode "w:tblW" [("w:type", "dxa"), ("w:w", show(textwidth))] () :
+                        mknode "w:tblLook" [("w:firstRow","1") | hasHeader ] () :
+                      [ mknode "w:tblCaption" [("w:val", captionStr)] ()
+                      | not (null caption) ] )
+                  : [ mkrow True headers' | hasHeader ] ++
+                  map (mkrowW True) rws
+                  )]
+  modify $ \st -> st{ stInTable = False}
+  return content
 blockToOpenXML opts (BulletList lst) = do
   let marker = BulletMarker
   addList marker
@@ -985,7 +990,8 @@ getParaProps displayMathPara = do
   props <- gets stParaProperties
   listLevel <- gets stListLevel
   numid <- gets stListNumId
-  let listPr = if listLevel >= 0 && not displayMathPara
+  inTable <- gets stInTable
+  let listPr = if listLevel >= 0 && not displayMathPara && not inTable
                   then [ mknode "w:numPr" []
                          [ mknode "w:numId" [("w:val",show numid)] ()
                          , mknode "w:ilvl" [("w:val",show listLevel)] () ]
