@@ -847,6 +847,7 @@ blockToOpenXML opts (ComplexTable caption aligns widths height headers rows) = d
                                           ("w:space","0"),("w:color","auto")] ()
                       ,mknode "w:insideV" [("w:val","single"),("w:sz","4"),
                                           ("w:space","0"),("w:color","auto")] ()]
+                      ,mknode "w:vAlign" [("w:val","center")] ()
                     ]
   let textwidth = 7200  -- 5.5 in in twips, 1/20 pt
   let fullrow = 5000 -- 100% specified in pct
