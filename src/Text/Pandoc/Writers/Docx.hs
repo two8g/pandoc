@@ -967,7 +967,7 @@ getTextProps :: WS [Element]
 getTextProps = do
   props <- gets stTextProperties
   return $ if null props
-              then []
+              then [mknode "w:rpr" [] $ mknode "w:rFonts" [("w:eastAsia","宋体"),("w:cs","Times New Roman"),("w:ascii","Times New Roman"),("w:hAnsi","Times New Roman")] ()]
               else [mknode "w:rPr" [] props]
 
 pushTextProp :: Element -> WS ()
