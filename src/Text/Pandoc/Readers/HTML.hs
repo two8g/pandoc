@@ -455,13 +455,13 @@ pTable = try $ do
 --  let cols = length $ if null head' then head rows else head'
   -- fail if there are colspans or rowspans
 --  guard $ all (\r -> length r == cols) rows
-  let cols = map sum colspanss
+  let cols = map (\x -> replicate (length x) (sum x)) colspanss
   let widths = if isSimple
-                  then map (\x -> replicate (fromIntegral x) 0) cols
-                  else map ( map (\x -> (fromIntegral x)/(fromIntegral (head cols))) ) colspanss
+                  then map (map (\x -> 0)) cols
+                  else map ( map (\x -> (fromIntegral (fst x))/(fromIntegral (snd x))) ) (zipWith zip colspanss cols)
   let height = if isSimple
-                   then map (\x -> replicate x 0) cols
-                   else map (\x -> replicate x (1.0 / fromIntegral x)) cols
+                   then map (map (\x -> 0)) cols
+                   else map ( map (\x -> (fromIntegral (fst x))/(fromIntegral (snd x))) ) (zipWith zip colspanss cols)
   return $ B.complexTable caption alignss widths height heads rows
 
 
