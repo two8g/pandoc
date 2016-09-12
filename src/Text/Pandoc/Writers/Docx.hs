@@ -619,6 +619,8 @@ mkLvl marker lvl =
         $ mknode "w:tab" [("w:val","num"),("w:pos",show $ lvl * step)] ()
       , mknode "w:ind" [("w:left",show $ lvl * step + hang),("w:hanging",show hang)] ()
       ]
+    , mknode "w:rPr" []
+      [ mknode "w:rFonts" [("w:eastAsia","宋体"),("w:cs","Times New Roman"),("w:ascii","Times New Roman"),("w:hAnsi","Times New Roman")] ()]
     ]
     where (fmt, lvltxt, start) =
             case marker of
