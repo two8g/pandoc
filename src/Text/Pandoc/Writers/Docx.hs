@@ -1181,7 +1181,7 @@ inlineToOpenXML opts (Image attr alt (src, _)) = do
           let (xpt,ypt) = desiredSizeInPoints opts attr
                  (either (const def) id (imageSize img))
           -- 12700 emu = 1 pt
-          let (xemu,yemu) = fitToPage (xpt * 12700, ypt * 12700) (pageWidth * 12700)
+          let (xemu,yemu) = fitToPage (xpt * 12700 * 0.75 , ypt * 12700 * 0.75) (pageWidth * 12700)
           let cNvPicPr = mknode "pic:cNvPicPr" [] $
                            mknode "a:picLocks" [("noChangeArrowheads","1"),("noChangeAspect","1")] ()
           let nvPicPr  = mknode "pic:nvPicPr" []
