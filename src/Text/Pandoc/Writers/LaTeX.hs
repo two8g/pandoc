@@ -978,8 +978,8 @@ inlineToLaTeX (Image attr _ (source, _)) = do
   source'' <- stringToLaTeX URLString source'
   inHeading <- gets stInHeading
   return $
-    (if inHeading then "\\protect\\includegraphics" else "\\includegraphics") <>
-    dims <> braces (text source'')
+    (if inHeading then "\\protect\\scalebox{0.75}{\\includegraphics" else "\\scalebox{0.75}{\\includegraphics") <>
+    dims <> braces (text source'') <> "}"
 inlineToLaTeX (Note contents) = do
   inMinipage <- gets stInMinipage
   modify (\s -> s{stInNote = True})
