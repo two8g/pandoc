@@ -578,11 +578,11 @@ blockToLaTeX (Header level (id',classes,_) lst) = do
   hdr <- sectionHeader ("unnumbered" `elem` classes) id' level lst
   modify $ \s -> s{stInHeading = False}
   return hdr
-blockToLaTeX (Table caption aligns widths heads rows) = do
+blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
   headers <- if all null heads
                 then return empty
                 else do
-                    contents <- (tableRowToLaTeX True aligns widths) heads
+                    contents <- (tableRowToLaTeX True (head aligns) (head widths)) heads
                     return ("\\toprule" $$ contents $$ "\\midrule")
   let endhead = if all null heads
                    then empty
@@ -596,8 +596,8 @@ blockToLaTeX (Table caption aligns widths heads rows) = do
                 else text "\\caption" <> braces captionText <> "\\tabularnewline"
                          $$ headers
                          $$ endfirsthead
-  rows' <- mapM (tableRowToLaTeX False aligns widths) rows
-  let colDescriptors = text $ concat $ map toColDescriptor aligns
+  rows' <- mapM (tableRowToLaTeX False (head aligns) (head widths)) rows
+  let colDescriptors = text $ concat $ map toColDescriptor (head aligns)
   modify $ \s -> s{ stTable = True }
   return $ "\\begin{longtable}[]" <>
               braces ("@{}" <> colDescriptors <> "@{}")
@@ -849,6 +849,8 @@ inlineToLaTeX (Emph lst) =
   inlineListToLaTeX lst >>= return . inCmd "emph"
 inlineToLaTeX (Strong lst) =
   inlineListToLaTeX lst >>= return . inCmd "textbf"
+inlineToLaTeX (Uline lst) =
+  inlineListToLaTeX lst >>= return . inCmd "underline"
 inlineToLaTeX (Strikeout lst) = do
   -- we need to protect VERB in an mbox or we get an error
   -- see #1294
