@@ -600,23 +600,24 @@ blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
   let colDescriptors = text $ concat $ map toColDescriptor (head aligns)
   modify $ \s -> s{ stTable = True }
   return $ "\\begin{longtable}[]" <>
-              braces ("@{}" <> colDescriptors <> "@{}")
+              braces ("@{}|" <> colDescriptors <> "@{}")
               -- the @{} removes extra space at beginning and end
          $$ capt
-         $$ (if all null heads then "\\toprule" else empty)
+--         $$ (if all null heads then "\\toprule" else empty)
+         $$ "\\hline"
          $$ headers
          $$ endhead
          $$ vcat rows'
-         $$ "\\bottomrule"
+--         $$ "\\bottomrule"
          $$ "\\end{longtable}"
 
 toColDescriptor :: Alignment -> String
 toColDescriptor align =
   case align of
-         AlignLeft    -> "l"
-         AlignRight   -> "r"
-         AlignCenter  -> "c"
-         AlignDefault -> "l"
+         AlignLeft    -> "l|"
+         AlignRight   -> "r|"
+         AlignCenter  -> "c|"
+         AlignDefault -> "l|"
 
 blockListToLaTeX :: [Block] -> State WriterState Doc
 blockListToLaTeX lst = vsep `fmap` mapM blockToLaTeX lst
@@ -632,7 +633,7 @@ tableRowToLaTeX header aligns widths cols = do
   let scaleFactor = 0.97 ** fromIntegral (length aligns)
   let widths' = map (scaleFactor *) widths
   cells <- mapM (tableCellToLaTeX header) $ zip3 widths' aligns cols
-  return $ hsep (intersperse "&" cells) <> "\\tabularnewline"
+  return $ hsep (intersperse "&" cells) <> "\\\\ \\hline"
 
 -- For simple latex tables (without minipages or parboxes),
 -- we need to go to some lengths to get line breaks working:
