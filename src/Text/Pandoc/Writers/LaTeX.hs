@@ -419,7 +419,7 @@ blockToLaTeX (Para [Image attr@(ident, _, _) txt (src,'f':'i':'g':':':tit)]) = d
   img <- inlineToLaTeX (Image attr txt (src,tit))
   let footnotes = notesToLaTeX notes
   lab <- labelFor ident
-  let caption = "\\caption" <> captForLof <> braces capt <> lab
+  let caption = "\\caption*" <> captForLof <> braces capt <> lab
   figure <- hypertarget ident (cr <>
             "\\begin{figure}[htbp]" $$ "\\centering" $$ img $$
             caption $$ "\\end{figure}" <> cr)
