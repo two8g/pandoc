@@ -599,7 +599,8 @@ blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
   rows' <- mapM (tableRowToLaTeX False (head aligns) (head widths)) rows
   let colDescriptors = text $ concat $ map toColDescriptor (head aligns)
   modify $ \s -> s{ stTable = True }
-  return $ "\\begin{longtable}[]" <>
+  return $  "\\begin{center}"
+         $$ "\\begin{tabular}[]" <>
               braces ("@{}|" <> colDescriptors <> "@{}")
               -- the @{} removes extra space at beginning and end
          $$ capt
@@ -609,7 +610,8 @@ blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
          $$ endhead
          $$ vcat rows'
 --         $$ "\\bottomrule"
-         $$ "\\end{longtable}"
+         $$ "\\end{tabular}"
+         $$ "\\end{tabular}"
 
 toColDescriptor :: Alignment -> String
 toColDescriptor align =
