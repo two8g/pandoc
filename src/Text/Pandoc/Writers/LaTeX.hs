@@ -611,7 +611,7 @@ blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
          $$ vcat rows'
 --         $$ "\\bottomrule"
          $$ "\\end{tabular}"
-         $$ "\\end{tabular}"
+         $$ "\\end{center}"
 
 toColDescriptor :: Alignment -> String
 toColDescriptor align =
