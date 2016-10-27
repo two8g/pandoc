@@ -600,7 +600,7 @@ blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
   let colDescriptors = text $ concat $ map toColDescriptor (head aligns)
   modify $ \s -> s{ stTable = True }
   return $  "\\begin{center}"
-         $$ "\\begin{tabular}[]" <>
+         $$ "\\begin{longtable}[]" <>
               braces ("@{}|" <> colDescriptors <> "@{}")
               -- the @{} removes extra space at beginning and end
          $$ capt
@@ -610,8 +610,9 @@ blockToLaTeX (ComplexTable caption aligns widths height heads rows) = do
          $$ endhead
          $$ vcat rows'
 --         $$ "\\bottomrule"
-         $$ "\\end{tabular}"
+         $$ "\\end{longtable}"
          $$ "\\end{center}"
+         $$ "\\vspace{\\dimexpr-2\\parsep-2\\parskip\\relax}"
 
 toColDescriptor :: Alignment -> String
 toColDescriptor align =
@@ -676,10 +677,7 @@ tableCellToLaTeX header (width, align, blocks) = do
                AlignRight   -> "\\raggedleft"
                AlignCenter  -> "\\centering"
                AlignDefault -> "\\raggedright"
-  return $ ("\\begin{minipage}" <> valign <>
-            braces (text (printf "%.2f\\columnwidth" width)) <>
-            (halign <> "\\strut" <> cr <> cellContents <> "\\strut" <> cr) <>
-            "\\end{minipage}") $$
+  return $ cellContents $$
             notesToLaTeX notes
 
 notesToLaTeX :: [Doc] -> Doc
