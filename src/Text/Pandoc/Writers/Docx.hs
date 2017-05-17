@@ -1225,7 +1225,7 @@ inlineToOpenXML' opts (Image attr alt (src, title)) = do
                  mknode "wp:inline" []
                   [ mknode "wp:extent" [("cx",show xemu),("cy",show yemu)] ()
                   , mknode "wp:effectExtent" [("b","0"),("l","0"),("r","0"),("t","0")] ()
-                  , mknode "wp:docPr" [("descr",stringify alt), ("title", title), ("id","1"),("name","Picture")] ()
+                  , mknode "wp:docPr" [("id","1"),("name","Picture")] ()
                   , graphic ]
           let imgext = case mt >>= extensionFromMimeType of
                             Just x    -> '.':x
