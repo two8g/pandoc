@@ -537,6 +537,7 @@ inline = choice
            , pQ
            , pEmph
            , pStrong
+           , pUline
            , pSuperscript
            , pSubscript
            , pStrikeout
@@ -592,6 +593,9 @@ pEmph = pInlinesInTags "em" B.emph <|> pInlinesInTags "i" B.emph
 
 pStrong :: TagParser Inlines
 pStrong = pInlinesInTags "strong" B.strong <|> pInlinesInTags "b" B.strong
+
+pUline :: TagParser Inlines
+pUline = pInlinesInTags "u" B.uline
 
 pSuperscript :: TagParser Inlines
 pSuperscript = pInlinesInTags "sup" B.superscript

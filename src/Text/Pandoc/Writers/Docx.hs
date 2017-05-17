@@ -1085,6 +1085,8 @@ inlineToOpenXML' opts (Span (ident,classes,kvs) ils)
       $ inlinesToOpenXML opts ils
 inlineToOpenXML' opts (Strong lst) =
   withTextProp (mknode "w:b" [] ()) $ inlinesToOpenXML opts lst
+inlineToOpenXML' opts (Uline lst) =
+  withTextProp (mknode "w:u" [("w:val","single")] ()) $ inlinesToOpenXML opts lst
 inlineToOpenXML' opts (Emph lst) =
   withTextProp (mknode "w:i" [] ()) $ inlinesToOpenXML opts lst
 inlineToOpenXML' opts (Subscript lst) =

@@ -878,6 +878,8 @@ inlineToLaTeX (Emph lst) =
   inlineListToLaTeX lst >>= return . inCmd "emph"
 inlineToLaTeX (Strong lst) =
   inlineListToLaTeX lst >>= return . inCmd "textbf"
+inlineToLaTeX (Uline lst) =
+  inlineListToLaTeX lst >>= return . inCmd "underline"
 inlineToLaTeX (Strikeout lst) = do
   -- we need to protect VERB in an mbox or we get an error
   -- see #1294

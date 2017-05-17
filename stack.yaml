@@ -7,6 +7,7 @@ flags:
     network-uri: true
 packages:
 - '.'
+- '../pandoc-types'
 extra-deps:
 - texmath-0.9
 - doctemplates-0.1.0.2
